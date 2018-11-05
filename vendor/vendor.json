@@ -1,0 +1,17 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"path": "github.com/kardianos/govendor",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "EefrUdqMEXf5NaDmT1709v2kNCk=",
+			"path": "github.com/spf13/pflag",
+			"revision": "082b515c9490f4eccc758469c3152b77d139f868",
+			"revisionTime": "2018-10-24T21:20:40Z"
+		}
+	],
+	"rootPath": "github.com/vickleford/kuby"
+}
