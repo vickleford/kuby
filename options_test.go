@@ -17,7 +17,6 @@ func TestKubeconfigFlagSetsValue(t *testing.T) {
 	osArgsSim := []string{"kuby", "--kubeconfig", expected, "get", "nodes"}
 	args := NewArgTranslator(osArgsSim)
 	if args.ConfigFile != expected {
-		// displayCircumstances()
 		t.Errorf("Expected %s, got %s", expected, args.ConfigFile)
 	}
 }
@@ -38,8 +37,25 @@ func TestKubeconfigFlagTrumpsEnvVar(t *testing.T) {
 	osArgsSim := []string{"kuby", "--kubeconfig", expected, "get", "nodes"}
 	args := NewArgTranslator(osArgsSim)
 	if args.ConfigFile != expected {
-		// displayCircumstances()
 		t.Errorf("Expected %s, got %s", expected, args.ConfigFile)
+	}
+}
+
+func TestContextFlagNotPresent(t *testing.T) {
+	expected := ""
+	osArgsSim := []string{"kuby", "get", "nodes"}
+	args := NewArgTranslator(osArgsSim)
+	if args.Context != expected {
+		t.Errorf("Expected %s, got %s", expected, args.Context)
+	}
+}
+
+func TestContextFlagDetected(t *testing.T) {
+	expected := "llama"
+	osArgsSim := []string{"kuby", "--context=llama", "get", "nodes"}
+	args := NewArgTranslator(osArgsSim)
+	if args.Context != expected {
+		t.Errorf("Expected %s, got %s", expected, args.Context)
 	}
 }
 

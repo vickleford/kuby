@@ -6,11 +6,13 @@ import "os"
 type ArgTranslator struct {
 	args       []string
 	ConfigFile string
+	Context    string
 }
 
 func (a *ArgTranslator) Parse() {
 	flagset := flag.NewFlagSet(a.args[0], flag.ExitOnError)
-	kubeconfFlag := flagset.String("kubeconfig", "", "Specify an alternative path to kubeconfig")
+	kubeconfFlag := flagset.String("kubeconfig", "", "Specify an alternative path to `kubeconfig`")
+	contextFlag := flagset.String("context", "", "Use context from `kubeconfig`")
 	flagset.Parse(a.args)
 
 	if *kubeconfFlag != "" {
@@ -20,6 +22,8 @@ func (a *ArgTranslator) Parse() {
 	} else {
 		a.ConfigFile = "~/.kube/config"
 	}
+
+	a.Context = *contextFlag
 }
 
 func NewArgTranslator(args []string) *ArgTranslator {
