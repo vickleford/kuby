@@ -1,17 +1,12 @@
 package ctxmgr
 
 import (
-	"os"
+	"strings"
 	"testing"
 )
 
 func TestNoContextFromCliCurrentContextFound(t *testing.T) {
-	config, err := os.Open("../fixtures/sample_with_context.conf")
-	if err != nil {
-		t.Errorf("Error opening test fixture: %s", err)
-	}
-
-	ctxmgr := New(config)
+	ctxmgr := New(strings.NewReader(conf_with_context))
 	expectedUsername := "admin"
 	expectedPassword := "wheredyougetthosepeepers"
 
@@ -27,12 +22,7 @@ func TestNoContextFromCliCurrentContextFound(t *testing.T) {
 }
 
 func TestNoContextFromCommandLineNoCurrentContext(t *testing.T) {
-	config, err := os.Open("../fixtures/sample_no_context.conf")
-	if err != nil {
-		t.Errorf("Error opening test fixture: %s", err)
-	}
-
-	ctxmgr := New(config)
+	ctxmgr := New(strings.NewReader(conf_no_context))
 	expectedUsername := "admin"
 	expectedPassword := "jeeperscreepers"
 
@@ -48,12 +38,7 @@ func TestNoContextFromCommandLineNoCurrentContext(t *testing.T) {
 }
 
 func TestContextGivenFromCommandLineCurrentContextFound(t *testing.T) {
-	config, err := os.Open("../fixtures/sample_with_context.conf")
-	if err != nil {
-		t.Errorf("Error opening test fixture: %s", err)
-	}
-
-	ctxmgr := NewWithContext(config, "us-east-1")
+	ctxmgr := NewWithContext(strings.NewReader(conf_with_context), "us-east-1")
 	expectedUsername := "admin"
 	expectedPassword := "jeeperscreepers"
 
@@ -69,12 +54,7 @@ func TestContextGivenFromCommandLineCurrentContextFound(t *testing.T) {
 }
 
 func TestContextGivenFromCommandLineNoCurrentContext(t *testing.T) {
-	config, err := os.Open("../fixtures/sample_no_context.conf")
-	if err != nil {
-		t.Errorf("Error opening test fixture: %s", err)
-	}
-
-	ctxmgr := NewWithContext(config, "us-west-2")
+	ctxmgr := NewWithContext(strings.NewReader(conf_no_context), "us-west-2")
 	expectedUsername := "admin"
 	expectedPassword := "wheredyougetthosepeepers"
 
@@ -88,3 +68,95 @@ func TestContextGivenFromCommandLineNoCurrentContext(t *testing.T) {
 			expectedPassword, pass)
 	}
 }
+
+var conf_no_context = `
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: REDACTED
+    server: https://api.fredthefriendlycluster.us-east-1.example.com
+  name: fredthefriendlycluster.us-east-1.example.com
+- cluster:
+    certificate-authority-data: REDACTED
+    server: https://api.fredthefriendlycluster.us-west-2.example.com
+  name: fredthefriendlycluster.us-west-2.example.com
+contexts:
+- context:
+    cluster: fredthefriendlycluster.us-east-1.example.com
+    user: fredthefriendlycluster.us-east-1.example.com
+  name: us-east-1
+- context:
+    cluster: fredthefriendlycluster.us-west-2.example.com
+    user: fredthefriendlycluster.us-west-2.example.com
+  name: us-west-2
+current-context: ""
+kind: Config
+preferences: {}
+users:
+- name: fredthefriendlycluster.us-east-1.example.com
+  user:
+    client-certificate-data: REDACTED
+    client-key-data: REDACTED
+    password: jeeperscreepers
+    username: admin
+- name: fredthefriendlycluster.us-east-1.example.com-basic-auth
+  user:
+    password: jeeperscreepers
+    username: admin
+- name: fredthefriendlycluster.us-west-2.example.com
+  user:
+    client-certificate-data: REDACTED
+    client-key-data: REDACTED
+    password: wheredyougetthosepeepers
+    username: admin
+- name: fredthefriendlycluster.us-west-2.example.com-basic-auth
+  user:
+    password: wheredyougetthosepeepers
+    username: admin
+`
+
+var conf_with_context = `
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: REDACTED
+    server: https://api.fredthefriendlycluster.us-east-1.example.com
+  name: fredthefriendlycluster.us-east-1.example.com
+- cluster:
+    certificate-authority-data: REDACTED
+    server: https://api.fredthefriendlycluster.us-west-2.example.com
+  name: fredthefriendlycluster.us-west-2.example.com
+contexts:
+- context:
+    cluster: fredthefriendlycluster.us-east-1.example.com
+    user: fredthefriendlycluster.us-east-1.example.com
+  name: us-east-1
+- context:
+    cluster: fredthefriendlycluster.us-west-2.example.com
+    user: fredthefriendlycluster.us-west-2.example.com
+  name: us-west-2
+current-context: us-west-2
+kind: Config
+preferences: {}
+users:
+- name: fredthefriendlycluster.us-east-1.example.com
+  user:
+    client-certificate-data: REDACTED
+    client-key-data: REDACTED
+    password: jeeperscreepers
+    username: admin
+- name: fredthefriendlycluster.us-east-1.example.com-basic-auth
+  user:
+    password: jeeperscreepers
+    username: admin
+- name: fredthefriendlycluster.us-west-2.example.com
+  user:
+    client-certificate-data: REDACTED
+    client-key-data: REDACTED
+    password: wheredyougetthosepeepers
+    username: admin
+- name: fredthefriendlycluster.us-west-2.example.com-basic-auth
+  user:
+    password: wheredyougetthosepeepers
+    username: admin
+`
