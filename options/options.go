@@ -1,4 +1,4 @@
-package main
+package options
 
 import flag "github.com/spf13/pflag"
 import "os"
@@ -26,7 +26,7 @@ func (a *ArgTranslator) Parse() {
 	a.Context = *contextFlag
 }
 
-func NewArgTranslator(args []string) *ArgTranslator {
+func New(args []string) *ArgTranslator {
 	argtr := new(ArgTranslator)
 	argtr.args = args
 	argtr.Parse()
