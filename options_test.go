@@ -58,5 +58,3 @@ func TestContextFlagDetected(t *testing.T) {
 		t.Errorf("Expected %s, got %s", expected, args.Context)
 	}
 }
-
-// https://groups.google.com/forum/#!topic/Golang-Nuts/1aZmhhSvwWc
