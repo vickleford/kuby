@@ -59,6 +59,26 @@ func TestBasicAuthUsage(t *testing.T) {
 	}
 }
 
+func TestUserAgentSet(t *testing.T) {
+	expected := "kuby"
+	testClient, spy := buildHappyTestClient()
+	client := New("https://api.k8s.example.com", "admin", "shhh", testClient)
+	client.ClusterVersion()
+	if actual := spy.request.Header.Get("User-Agent"); actual != expected {
+		t.Errorf("Expected %s, got %s", expected, actual)
+	}
+}
+
+func TestAcceptHeader(t *testing.T) {
+	expected := "application/json"
+	testClient, spy := buildHappyTestClient()
+	client := New("https://api.k8s.example.com", "admin", "shhh", testClient)
+	client.ClusterVersion()
+	if actual := spy.request.Header.Get("Accept"); actual != expected {
+		t.Errorf("Expected %s, got %s", expected, actual)
+	}
+}
+
 const niceResponse = `{
 	"major": "1",
 	"minor": "10",
