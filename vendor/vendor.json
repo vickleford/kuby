@@ -11,6 +11,12 @@
 			"path": "github.com/spf13/pflag",
 			"revision": "082b515c9490f4eccc758469c3152b77d139f868",
 			"revisionTime": "2018-10-24T21:20:40Z"
+		},
+		{
+			"checksumSHA1": "ZSWoOPUNRr5+3dhkLK3C4cZAQPk=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": "5420a8b6744d3b0345ab293f6fcba19c978f1183",
+			"revisionTime": "2018-03-28T19:50:20Z"
 		}
 	],
 	"rootPath": "github.com/vickleford/kuby"
