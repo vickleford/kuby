@@ -69,7 +69,7 @@ func TestContextGivenFromCommandLineNoCurrentContext(t *testing.T) {
 	}
 }
 
-var conf_no_context = `
+const conf_no_context = `
 apiVersion: v1
 clusters:
 - cluster:
@@ -115,7 +115,7 @@ users:
     username: admin
 `
 
-var conf_with_context = `
+const conf_with_context = `
 apiVersion: v1
 clusters:
 - cluster:
