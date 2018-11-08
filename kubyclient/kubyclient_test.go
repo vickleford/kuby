@@ -6,10 +6,26 @@ import (
 	"github.com/vickleford/kuby/httpclienttest"
 )
 
+type mockContextManager struct{}
+
+func (m mockContextManager) Username() string {
+	return "admin"
+}
+
+func (m mockContextManager) Password() string {
+	return "shhh"
+}
+
+func (m mockContextManager) Endpoint() string {
+	return "https://api.k8s.example.com"
+}
+
+var mockCtxMgr mockContextManager
+
 func TestGetVersion(t *testing.T) {
 	expected := "v1.10.0"
 	testClient, _ := httpclienttest.New(niceResponse)
-	client := New("https://api.k8s.example.com", "admin", "shhh", testClient)
+	client := New(mockCtxMgr, testClient)
 
 	if actual := client.ClusterVersion(); actual != expected {
 		t.Errorf("Expected %s, got %s", expected, actual)
@@ -20,7 +36,7 @@ func TestBasicAuthUsage(t *testing.T) {
 	expectedUsername := "admin"
 	expectedPassword := "shhh"
 	testClient, spy := httpclienttest.New(niceResponse)
-	client := New("https://api.k8s.example.com", expectedUsername, expectedPassword, testClient)
+	client := New(mockCtxMgr, testClient)
 	client.ClusterVersion()
 	actualUsername, actualPassword, _ := spy.Request.BasicAuth()
 	if actualUsername != expectedUsername {
@@ -35,7 +51,7 @@ func TestBasicAuthUsage(t *testing.T) {
 func TestUserAgentSet(t *testing.T) {
 	expected := "kuby"
 	testClient, spy := httpclienttest.New(niceResponse)
-	client := New("https://api.k8s.example.com", "admin", "shhh", testClient)
+	client := New(mockCtxMgr, testClient)
 	client.ClusterVersion()
 	if actual := spy.Request.Header.Get("User-Agent"); actual != expected {
 		t.Errorf("Expected %s, got %s", expected, actual)
@@ -45,7 +61,7 @@ func TestUserAgentSet(t *testing.T) {
 func TestAcceptHeader(t *testing.T) {
 	expected := "application/json"
 	testClient, spy := httpclienttest.New(niceResponse)
-	client := New("https://api.k8s.example.com", "admin", "shhh", testClient)
+	client := New(mockCtxMgr, testClient)
 	client.ClusterVersion()
 	if actual := spy.Request.Header.Get("Accept"); actual != expected {
 		t.Errorf("Expected %s, got %s", expected, actual)

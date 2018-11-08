@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/vickleford/kuby/ctxmgr"
 )
 
 type ClusterVersion struct {
@@ -16,20 +18,18 @@ type KubyClient interface {
 }
 
 type kubyclient struct {
-	clusterurl string
-	username   string
-	password   string
-	client     *http.Client
+	context ctxmgr.ContextManager
+	client  *http.Client
 }
 
 func (k *kubyclient) ClusterVersion() string {
-	path := fmt.Sprintf("%s/version", k.clusterurl)
+	path := fmt.Sprintf("%s/version", k.context.Endpoint())
 
 	req, err := http.NewRequest("GET", path, nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating request: %s\n", err)
 	}
-	req.SetBasicAuth(k.username, k.password)
+	req.SetBasicAuth(k.context.Username(), k.context.Password())
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("User-Agent", "kuby")
 
@@ -49,12 +49,9 @@ func (k *kubyclient) ClusterVersion() string {
 	return v.GitVersion
 }
 
-func New(clusterurl, username, password string, c *http.Client) KubyClient {
+func New(ctx ctxmgr.ContextManager, c *http.Client) KubyClient {
 	kubyclient := new(kubyclient)
-	kubyclient.clusterurl = clusterurl
-	kubyclient.username = username
-	kubyclient.password = password
-	// kubyclient.client = new(http.Client)
+	kubyclient.context = ctx
 	kubyclient.client = c
 	return kubyclient
 }

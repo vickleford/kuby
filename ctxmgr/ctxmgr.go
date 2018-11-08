@@ -86,7 +86,6 @@ func (c *contextManager) loadUser(user string) {
 }
 
 func (c *contextManager) loadEndpoint() {
-	fmt.Printf("looking for %s\n", c.cluster)
 	for _, cluster := range c.kubeconfig.Clusters {
 		if cluster.Name == c.cluster {
 			c.endpoint = cluster.Cluster.Server
@@ -95,29 +94,18 @@ func (c *contextManager) loadEndpoint() {
 }
 
 func (c *contextManager) parse() {
-	c.loadConfig()
-
 	var contextUser string
 	if c.kubeconfig.CurrentContext == "" {
 		contextUser = c.kubeconfig.Contexts[0].Context.User
 		c.cluster = c.kubeconfig.Contexts[0].Context.Cluster
+		c.loadUser(contextUser)
+		c.loadEndpoint()
 	} else {
-		for _, context := range c.kubeconfig.Contexts {
-			if context.Name == c.kubeconfig.CurrentContext {
-				contextUser = context.Context.User
-				c.cluster = context.Context.Cluster
-				break
-			}
-		}
+		c.parseContext(c.kubeconfig.CurrentContext)
 	}
-
-	c.loadUser(contextUser)
-	c.loadEndpoint()
 }
 
 func (c *contextManager) parseContext(wantedContext string) {
-	c.loadConfig()
-
 	var contextUser string
 	for _, context := range c.kubeconfig.Contexts {
 		if context.Name == wantedContext {
@@ -134,6 +122,7 @@ func (c *contextManager) parseContext(wantedContext string) {
 func New(conf io.Reader) ContextManager {
 	ctx := new(contextManager)
 	ctx.config = conf
+	ctx.loadConfig()
 	ctx.parse()
 	return ctx
 }
@@ -141,6 +130,7 @@ func New(conf io.Reader) ContextManager {
 func NewWithContext(conf io.Reader, context string) ContextManager {
 	ctx := new(contextManager)
 	ctx.config = conf
+	ctx.loadConfig()
 	ctx.parseContext(context)
 	return ctx
 }
