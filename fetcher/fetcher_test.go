@@ -14,9 +14,9 @@ func TestFetcherKnowsTheRightPlace(t *testing.T) {
 	expectedPath := "/kubernetes-release/release/v1.10.0/bin/linux/amd64/kubectl"
 
 	testClient, spy := httpclienttest.New("bonk")
-	fetcher := New(fileFaker)
-	fetcher.setClient(testClient) // let's experiment with this style
+	fetcher := New(fileFaker, testClient)
 	fetcher.Pull("v1.10.0")
+
 	if actualScheme := spy.Request.URL.Scheme; actualScheme != expectedScheme {
 		t.Errorf("Got scheme %s, expected %s", actualScheme, expectedScheme)
 	}
@@ -29,12 +29,12 @@ func TestFetcherKnowsTheRightPlace(t *testing.T) {
 }
 
 func TestFetcherFetches(t *testing.T) {
-	fileFaker := filefaker.New()
 	expectedWrite := "beebop"
-	testClient, _ := httpclienttest.New("beebop")
 
-	fetcher := New(fileFaker)
-	fetcher.setClient(testClient)
+	fileFaker := filefaker.New()
+	testClient, _ := httpclienttest.New(expectedWrite)
+
+	fetcher := New(fileFaker, testClient)
 	fetcher.Pull("v1.10.0")
 
 	if actualWrite := fileFaker.Observe(); actualWrite != expectedWrite {

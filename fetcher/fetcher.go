@@ -7,16 +7,16 @@ import (
 	"os"
 )
 
-type Fetcher struct {
+type Fetcher interface {
+	Pull(version string)
+}
+
+type fetcher struct {
 	client *http.Client
 	dest   io.WriteCloser
 }
 
-func (f *Fetcher) setClient(c *http.Client) {
-	f.client = c
-}
-
-func (f *Fetcher) Pull(version string) {
+func (f *fetcher) Pull(version string) {
 	path := fmt.Sprintf(
 		"https://storage.googleapis.com/kubernetes-release/release/%s/bin/linux/amd64/kubectl",
 		version)
@@ -39,9 +39,8 @@ func (f *Fetcher) Pull(version string) {
 	}
 }
 
-func New(dest io.WriteCloser) *Fetcher {
-	client := new(http.Client)
-	f := new(Fetcher)
+func New(dest io.WriteCloser, client *http.Client) Fetcher {
+	f := new(fetcher)
 	f.client = client
 	f.dest = dest
 	return f
