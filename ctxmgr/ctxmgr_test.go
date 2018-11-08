@@ -9,6 +9,7 @@ func TestNoContextFromCliCurrentContextFound(t *testing.T) {
 	ctxmgr := New(strings.NewReader(conf_with_context))
 	expectedUsername := "admin"
 	expectedPassword := "wheredyougetthosepeepers"
+	expectedUrl := "https://api.fredthefriendlycluster.us-west-2.example.com"
 
 	if user := ctxmgr.Username(); user != expectedUsername {
 		t.Errorf("Expected username %s, got %s",
@@ -18,6 +19,10 @@ func TestNoContextFromCliCurrentContextFound(t *testing.T) {
 	if pass := ctxmgr.Password(); pass != expectedPassword {
 		t.Errorf("Expected password %s, got %s",
 			expectedPassword, pass)
+	}
+
+	if url := ctxmgr.Endpoint(); url != expectedUrl {
+		t.Errorf("Expected endpoint %s, got %s", expectedUrl, url)
 	}
 }
 
@@ -25,6 +30,7 @@ func TestNoContextFromCommandLineNoCurrentContext(t *testing.T) {
 	ctxmgr := New(strings.NewReader(conf_no_context))
 	expectedUsername := "admin"
 	expectedPassword := "jeeperscreepers"
+	expectedUrl := "https://api.fredthefriendlycluster.us-east-1.example.com"
 
 	if user := ctxmgr.Username(); user != expectedUsername {
 		t.Errorf("Expected username %s, got %s",
@@ -34,6 +40,10 @@ func TestNoContextFromCommandLineNoCurrentContext(t *testing.T) {
 	if pass := ctxmgr.Password(); pass != expectedPassword {
 		t.Errorf("Expected password %s, got %s",
 			expectedPassword, pass)
+	}
+
+	if url := ctxmgr.Endpoint(); url != expectedUrl {
+		t.Errorf("Expected endpoint %s, got %s", expectedUrl, url)
 	}
 }
 
@@ -41,6 +51,7 @@ func TestContextGivenFromCommandLineCurrentContextFound(t *testing.T) {
 	ctxmgr := NewWithContext(strings.NewReader(conf_with_context), "us-east-1")
 	expectedUsername := "admin"
 	expectedPassword := "jeeperscreepers"
+	expectedUrl := "https://api.fredthefriendlycluster.us-east-1.example.com"
 
 	if user := ctxmgr.Username(); user != expectedUsername {
 		t.Errorf("Expected username %s, got %s",
@@ -50,6 +61,10 @@ func TestContextGivenFromCommandLineCurrentContextFound(t *testing.T) {
 	if pass := ctxmgr.Password(); pass != expectedPassword {
 		t.Errorf("Expected password %s, got %s",
 			expectedPassword, pass)
+	}
+
+	if url := ctxmgr.Endpoint(); url != expectedUrl {
+		t.Errorf("Expected endpoint %s, got %s", expectedUrl, url)
 	}
 }
 
@@ -57,6 +72,7 @@ func TestContextGivenFromCommandLineNoCurrentContext(t *testing.T) {
 	ctxmgr := NewWithContext(strings.NewReader(conf_no_context), "us-west-2")
 	expectedUsername := "admin"
 	expectedPassword := "wheredyougetthosepeepers"
+	expectedUrl := "https://api.fredthefriendlycluster.us-west-2.example.com"
 
 	if user := ctxmgr.Username(); user != expectedUsername {
 		t.Errorf("Expected username %s, got %s",
@@ -66,6 +82,10 @@ func TestContextGivenFromCommandLineNoCurrentContext(t *testing.T) {
 	if pass := ctxmgr.Password(); pass != expectedPassword {
 		t.Errorf("Expected password %s, got %s",
 			expectedPassword, pass)
+	}
+
+	if url := ctxmgr.Endpoint(); url != expectedUrl {
+		t.Errorf("Expected endpoint %s, got %s", expectedUrl, url)
 	}
 }
 

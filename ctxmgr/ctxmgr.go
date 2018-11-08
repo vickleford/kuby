@@ -11,7 +11,13 @@ import (
 
 type Kubeconfig struct {
 	CurrentContext string `yaml:"current-context"`
-	Contexts       []struct {
+	Clusters       []struct {
+		Name    string
+		Cluster struct {
+			Server string
+		}
+	}
+	Contexts []struct {
 		Name    string
 		Context struct {
 			Cluster string
@@ -30,6 +36,7 @@ type Kubeconfig struct {
 type ContextManager interface {
 	Username() string
 	Password() string
+	Endpoint() string
 }
 
 type contextManager struct {
@@ -37,6 +44,8 @@ type contextManager struct {
 	config     io.Reader
 	username   string
 	password   string
+	cluster    string
+	endpoint   string
 }
 
 func (c *contextManager) Username() string {
@@ -45,6 +54,10 @@ func (c *contextManager) Username() string {
 
 func (c *contextManager) Password() string {
 	return c.password
+}
+
+func (c *contextManager) Endpoint() string {
+	return c.endpoint
 }
 
 func (c *contextManager) loadConfig() {
@@ -72,36 +85,50 @@ func (c *contextManager) loadUser(user string) {
 	}
 }
 
+func (c *contextManager) loadEndpoint() {
+	fmt.Printf("looking for %s\n", c.cluster)
+	for _, cluster := range c.kubeconfig.Clusters {
+		if cluster.Name == c.cluster {
+			c.endpoint = cluster.Cluster.Server
+		}
+	}
+}
+
 func (c *contextManager) parse() {
 	c.loadConfig()
 
 	var contextUser string
 	if c.kubeconfig.CurrentContext == "" {
 		contextUser = c.kubeconfig.Contexts[0].Context.User
+		c.cluster = c.kubeconfig.Contexts[0].Context.Cluster
 	} else {
 		for _, context := range c.kubeconfig.Contexts {
 			if context.Name == c.kubeconfig.CurrentContext {
 				contextUser = context.Context.User
+				c.cluster = context.Context.Cluster
 				break
 			}
 		}
 	}
 
 	c.loadUser(contextUser)
+	c.loadEndpoint()
 }
 
-func (c *contextManager) parseContext(context string) {
+func (c *contextManager) parseContext(wantedContext string) {
 	c.loadConfig()
 
 	var contextUser string
-	for _, c := range c.kubeconfig.Contexts {
-		if c.Name == context {
-			contextUser = c.Context.User
+	for _, context := range c.kubeconfig.Contexts {
+		if context.Name == wantedContext {
+			contextUser = context.Context.User
+			c.cluster = context.Context.Cluster
 			break
 		}
 	}
 
 	c.loadUser(contextUser)
+	c.loadEndpoint()
 }
 
 func New(conf io.Reader) ContextManager {
