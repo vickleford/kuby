@@ -1,41 +1,14 @@
 package kubyclient
 
 import (
-	"io/ioutil"
-	"net/http"
-	"strings"
 	"testing"
+
+	"github.com/vickleford/kuby/httpclienttest"
 )
-
-type transportspy struct {
-	request  *http.Request
-	response *http.Response
-	err      error
-}
-
-func (t *transportspy) RoundTrip(r *http.Request) (*http.Response, error) {
-	t.request = r
-	return t.response, t.err
-}
-
-func buildHappyTestClient() (*http.Client, *transportspy) {
-	// build a nice response and inject
-	fakeResponse := new(http.Response)
-	fakeResponse.Body = ioutil.NopCloser(strings.NewReader(niceResponse))
-	fakeTransport := new(transportspy)
-	fakeTransport.response = fakeResponse
-
-	// swap out the http.Client's Transport for a spy
-	// client.client.Transport = fakeTransport
-	testClient := new(http.Client)
-	testClient.Transport = fakeTransport
-
-	return testClient, fakeTransport
-}
 
 func TestGetVersion(t *testing.T) {
 	expected := "v1.10.0"
-	testClient, _ := buildHappyTestClient()
+	testClient, _ := httpclienttest.New(niceResponse)
 	client := New("https://api.k8s.example.com", "admin", "shhh", testClient)
 
 	if actual := client.ClusterVersion(); actual != expected {
@@ -46,10 +19,10 @@ func TestGetVersion(t *testing.T) {
 func TestBasicAuthUsage(t *testing.T) {
 	expectedUsername := "admin"
 	expectedPassword := "shhh"
-	testClient, spy := buildHappyTestClient()
+	testClient, spy := httpclienttest.New(niceResponse)
 	client := New("https://api.k8s.example.com", expectedUsername, expectedPassword, testClient)
 	client.ClusterVersion()
-	actualUsername, actualPassword, _ := spy.request.BasicAuth()
+	actualUsername, actualPassword, _ := spy.Request.BasicAuth()
 	if actualUsername != expectedUsername {
 		t.Errorf("Expected %s, got %s", expectedUsername, actualUsername)
 	}
@@ -61,20 +34,20 @@ func TestBasicAuthUsage(t *testing.T) {
 
 func TestUserAgentSet(t *testing.T) {
 	expected := "kuby"
-	testClient, spy := buildHappyTestClient()
+	testClient, spy := httpclienttest.New(niceResponse)
 	client := New("https://api.k8s.example.com", "admin", "shhh", testClient)
 	client.ClusterVersion()
-	if actual := spy.request.Header.Get("User-Agent"); actual != expected {
+	if actual := spy.Request.Header.Get("User-Agent"); actual != expected {
 		t.Errorf("Expected %s, got %s", expected, actual)
 	}
 }
 
 func TestAcceptHeader(t *testing.T) {
 	expected := "application/json"
-	testClient, spy := buildHappyTestClient()
+	testClient, spy := httpclienttest.New(niceResponse)
 	client := New("https://api.k8s.example.com", "admin", "shhh", testClient)
 	client.ClusterVersion()
-	if actual := spy.request.Header.Get("Accept"); actual != expected {
+	if actual := spy.Request.Header.Get("Accept"); actual != expected {
 		t.Errorf("Expected %s, got %s", expected, actual)
 	}
 }
