@@ -1,5 +1,7 @@
 package filefaker
 
+import "io"
+
 type FileFaker struct {
 	written []byte
 	Err     error
@@ -27,3 +29,5 @@ func New() *FileFaker {
 	f := new(FileFaker)
 	return f
 }
+
+var _ io.WriteCloser = (*FileFaker)(nil)
