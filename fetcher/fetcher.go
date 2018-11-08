@@ -16,10 +16,6 @@ func (f *Fetcher) setClient(c *http.Client) {
 	f.client = c
 }
 
-// func (f *Fetcher) setDest(d io.WriteCloser) {
-// 	f.dest = d
-// }
-
 func (f *Fetcher) Pull(version string) {
 	path := fmt.Sprintf(
 		"https://storage.googleapis.com/kubernetes-release/release/%s/bin/linux/amd64/kubectl",
