@@ -14,10 +14,7 @@ import (
 )
 
 func main() {
-	// figure out how to silently pass through "unknown" args
-	// might require ditching pflag. ;( hope not.
-	// example: kuby -n namespace get pods
-	opts := options.New(os.Args[1:])
+	opts := options.New(os.Args)
 
 	kubeconfig, err := os.Open(opts.ConfigFile)
 	defer kubeconfig.Close()

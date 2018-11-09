@@ -10,10 +10,10 @@ type ArgTranslator struct {
 }
 
 func (a *ArgTranslator) Parse() {
-	flagset := flag.NewFlagSet(a.args[0], flag.ExitOnError)
+	flagset := flag.NewFlagSet(a.args[0], flag.ContinueOnError)
 	kubeconfFlag := flagset.String("kubeconfig", "", "Specify an alternative path to `kubeconfig`")
 	contextFlag := flagset.String("context", "", "Use context from `kubeconfig`")
-	flagset.Parse(a.args)
+	flagset.Parse(a.args[1:])
 
 	if *kubeconfFlag != "" {
 		a.ConfigFile = *kubeconfFlag

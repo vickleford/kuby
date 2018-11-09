@@ -58,3 +58,11 @@ func TestContextFlagDetected(t *testing.T) {
 		t.Errorf("Expected %s, got %s", expected, args.Context)
 	}
 }
+
+func TestUnknownShorthandFlagPassesThrough(t *testing.T) {
+	New([]string{"kuby", "-n", "thatnamespace", "get", "pods"})
+}
+
+func TestUnknownFlagPassesThrough(*testing.T) {
+	New([]string{"kuby", "--namespace", "foobar"})
+}
