@@ -32,7 +32,14 @@ type kubectl struct {
 // that somebody else can run?????
 func (k *kubectl) wrap(path string) {
 	k.cmd = exec.Command(path, os.Args[1:]...)
-	k.cmd.Env = []string{os.ExpandEnv(os.Getenv("KUBECONFIG"))}
+
+	cpy := os.Environ()
+	envvars := make([]string, len(cpy))
+	for i, envvar := range cpy {
+		envvars[i] = envvar
+	}
+	// looks like the env vars don't need to be expanded here.
+	k.cmd.Env = envvars
 }
 
 func (k *kubectl) Run() (err error) {

@@ -4,7 +4,7 @@ import "testing"
 import "os"
 
 func TestNoConfigGivesDefaultKubeconf(t *testing.T) {
-	expected := "~/.kube/config"
+	expected := os.ExpandEnv("${HOME}/.kube/config")
 	osArgsSim := []string{"kuby", "get", "nodes"}
 	args := New(osArgsSim)
 	if args.ConfigFile != expected {

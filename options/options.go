@@ -20,7 +20,7 @@ func (a *ArgTranslator) Parse() {
 	} else if os.Getenv("KUBECONFIG") != "" {
 		a.ConfigFile = os.Getenv("KUBECONFIG")
 	} else {
-		a.ConfigFile = "~/.kube/config"
+		a.ConfigFile = os.ExpandEnv("${HOME}/.kube/config")
 	}
 
 	a.Context = *contextFlag
