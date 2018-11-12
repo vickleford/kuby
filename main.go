@@ -39,11 +39,22 @@ func main() {
 	clusterclient := kubyclient.New(context, insecureclient)
 	version := clusterclient.ClusterVersion()
 
-	kubectlpath := os.ExpandEnv(fmt.Sprintf("${HOME}/.kubytest/kubectl-%s", version))
+	// don't forget to handle errors way better in general
+
+	destdir := os.ExpandEnv("${HOME}/.kuby")
+	if _, err := os.Stat(destdir); os.IsNotExist(err) {
+		if err = os.MkdirAll(destdir, 0755); err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
+		}
+	}
+
+	kubectlpath := fmt.Sprintf("%s/kubectl-%s", destdir, version)
 	if _, err := os.Stat(kubectlpath); os.IsNotExist(err) {
 		fmt.Printf("Downloading %s to %s...\n", version, kubectlpath)
-		// need to make it check for already existing files and not download again.
+
 		downloadpath, err := os.OpenFile(kubectlpath, os.O_CREATE|os.O_WRONLY, 0755)
+		// check for already existing files and not download again
 		// handle directory does not exist
 		// handle correct expansion of ~
 		// download with progress indicator https://golangcode.com/download-a-file-with-progress/
