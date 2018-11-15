@@ -43,6 +43,7 @@ func main() {
 	version, err := clusterclient.ClusterVersion()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
 	}
 
 	destdir := os.ExpandEnv("${HOME}/.kuby")
