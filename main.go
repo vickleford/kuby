@@ -19,16 +19,19 @@ func main() {
 	kubeconfig, err := os.Open(opts.ConfigFile)
 	defer kubeconfig.Close()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error opening %s: %s\n",
-			opts.ConfigFile, err)
+		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}
 
 	var context ctxmgr.ContextManager
 	if opts.Context == "" {
-		context = ctxmgr.New(kubeconfig)
+		context, err = ctxmgr.New(kubeconfig)
 	} else {
-		context = ctxmgr.NewWithContext(kubeconfig, opts.Context)
+		context, err = ctxmgr.NewWithContext(kubeconfig, opts.Context)
+	}
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading config: %s\n", err)
+		os.Exit(1)
 	}
 
 	httpclient := new(http.Client)

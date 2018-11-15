@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -46,6 +45,7 @@ type contextManager struct {
 	password   string
 	cluster    string
 	endpoint   string
+	err        error
 }
 
 func (c *contextManager) Username() string {
@@ -63,13 +63,13 @@ func (c *contextManager) Endpoint() string {
 func (c *contextManager) loadConfig() {
 	bytes, err := ioutil.ReadAll(c.config)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not read config: %s\n", err)
+		c.err = err
 	}
 
 	kubeconfig := new(Kubeconfig)
 	err = yaml.Unmarshal(bytes, kubeconfig)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not convert to YAML: %s\n", err)
+		c.err = err
 	}
 
 	c.kubeconfig = kubeconfig
@@ -80,7 +80,7 @@ func (c *contextManager) loadUser(user string) {
 		if user == u.Name {
 			c.username = u.User.Username
 			c.password = u.User.Password
-			break
+			return
 		}
 	}
 }
@@ -89,6 +89,7 @@ func (c *contextManager) loadEndpoint() {
 	for _, cluster := range c.kubeconfig.Clusters {
 		if cluster.Name == c.cluster {
 			c.endpoint = cluster.Cluster.Server
+			return
 		}
 	}
 }
@@ -107,30 +108,41 @@ func (c *contextManager) parse() {
 
 func (c *contextManager) parseContext(wantedContext string) {
 	var contextUser string
+	var foundContext bool
 	for _, context := range c.kubeconfig.Contexts {
 		if context.Name == wantedContext {
+			foundContext = true
 			contextUser = context.Context.User
 			c.cluster = context.Context.Cluster
 			break
 		}
 	}
 
+	if !foundContext {
+		c.err = newErrConfigParse(fmt.Sprintf("Context '%s' not found",
+			wantedContext))
+	}
+
 	c.loadUser(contextUser)
 	c.loadEndpoint()
 }
 
-func New(conf io.Reader) ContextManager {
+func New(conf io.Reader) (ContextManager, error) {
 	ctx := new(contextManager)
 	ctx.config = conf
 	ctx.loadConfig()
-	ctx.parse()
-	return ctx
+	if ctx.err == nil {
+		ctx.parse()
+	}
+	return ctx, ctx.err
 }
 
-func NewWithContext(conf io.Reader, context string) ContextManager {
+func NewWithContext(conf io.Reader, context string) (ContextManager, error) {
 	ctx := new(contextManager)
 	ctx.config = conf
 	ctx.loadConfig()
-	ctx.parseContext(context)
-	return ctx
+	if ctx.err == nil {
+		ctx.parseContext(context)
+	}
+	return ctx, ctx.err
 }

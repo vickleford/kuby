@@ -6,7 +6,7 @@ import (
 )
 
 func TestNoContextFromCliCurrentContextFound(t *testing.T) {
-	ctxmgr := New(strings.NewReader(conf_with_context))
+	ctxmgr, _ := New(strings.NewReader(conf_with_context))
 	expectedUsername := "admin"
 	expectedPassword := "wheredyougetthosepeepers"
 	expectedUrl := "https://api.fredthefriendlycluster.us-west-2.example.com"
@@ -27,7 +27,7 @@ func TestNoContextFromCliCurrentContextFound(t *testing.T) {
 }
 
 func TestNoContextFromCommandLineNoCurrentContext(t *testing.T) {
-	ctxmgr := New(strings.NewReader(conf_no_context))
+	ctxmgr, _ := New(strings.NewReader(conf_no_context))
 	expectedUsername := "admin"
 	expectedPassword := "jeeperscreepers"
 	expectedUrl := "https://api.fredthefriendlycluster.us-east-1.example.com"
@@ -48,7 +48,7 @@ func TestNoContextFromCommandLineNoCurrentContext(t *testing.T) {
 }
 
 func TestContextGivenFromCommandLineCurrentContextFound(t *testing.T) {
-	ctxmgr := NewWithContext(strings.NewReader(conf_with_context), "us-east-1")
+	ctxmgr, _ := NewWithContext(strings.NewReader(conf_with_context), "us-east-1")
 	expectedUsername := "admin"
 	expectedPassword := "jeeperscreepers"
 	expectedUrl := "https://api.fredthefriendlycluster.us-east-1.example.com"
@@ -69,7 +69,7 @@ func TestContextGivenFromCommandLineCurrentContextFound(t *testing.T) {
 }
 
 func TestContextGivenFromCommandLineNoCurrentContext(t *testing.T) {
-	ctxmgr := NewWithContext(strings.NewReader(conf_no_context), "us-west-2")
+	ctxmgr, _ := NewWithContext(strings.NewReader(conf_no_context), "us-west-2")
 	expectedUsername := "admin"
 	expectedPassword := "wheredyougetthosepeepers"
 	expectedUrl := "https://api.fredthefriendlycluster.us-west-2.example.com"
@@ -86,6 +86,13 @@ func TestContextGivenFromCommandLineNoCurrentContext(t *testing.T) {
 
 	if url := ctxmgr.Endpoint(); url != expectedUrl {
 		t.Errorf("Expected endpoint %s, got %s", expectedUrl, url)
+	}
+}
+
+func TestContextNotFoundGivesError(t *testing.T) {
+	_, err := NewWithContext(strings.NewReader(conf_with_context), "hangry")
+	if err == nil {
+		t.Error("Expected error when unable to find context in conf")
 	}
 }
 
