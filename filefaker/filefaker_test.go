@@ -1,6 +1,7 @@
 package filefaker
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -37,5 +38,13 @@ func TestClose(t *testing.T) {
 	w.Close()
 	if w.Closed != true {
 		t.Errorf("Expected %t, got %t", true, w.Closed)
+	}
+}
+
+func TestErrorInjection(t *testing.T) {
+	w := New()
+	w.Err = fmt.Errorf("oh noes i couldn't write! whatever shall i do?")
+	if _, err := w.Write([]byte("wee wee")); err == nil {
+		t.Error("Expected an error")
 	}
 }

@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/vickleford/kuby/filefaker"
@@ -39,6 +40,18 @@ func TestFetcherFetches(t *testing.T) {
 
 	if actualWrite := fileFaker.Observe(); actualWrite != expectedWrite {
 		t.Errorf("Expected content %s, got %s", expectedWrite, actualWrite)
+	}
+}
+
+func TestWriteErrorReturnsError(t *testing.T) {
+	fileFaker := filefaker.New()
+	fileFaker.Err = fmt.Errorf("eeeek can't write")
+	testClient, _ := httpclienttest.New("blah")
+
+	fetcher := New(fileFaker, testClient)
+	err := fetcher.Pull("v1.10.0")
+	if err == nil {
+		t.Error("Expected an error")
 	}
 }
 

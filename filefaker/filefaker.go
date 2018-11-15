@@ -13,6 +13,7 @@ func (w *FileFaker) Write(p []byte) (n int, err error) {
 	w.written = append(w.written, p...)
 	n = len(p)
 	w.N += n
+	err = w.Err
 	return n, err
 }
 

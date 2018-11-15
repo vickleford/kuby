@@ -45,8 +45,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 	}
 
-	// don't forget to handle errors way better in general
-
 	destdir := os.ExpandEnv("${HOME}/.kuby")
 	if _, err := os.Stat(destdir); os.IsNotExist(err) {
 		if err = os.MkdirAll(destdir, 0755); err != nil {
@@ -72,7 +70,12 @@ func main() {
 		}
 
 		downloader := fetcher.New(downloadpath, httpclient)
-		downloader.Pull(version)
+		err = downloader.Pull(version)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing kubectl to location %s: %s\n",
+				kubectlpath, err)
+			os.Exit(1)
+		}
 		downloadpath.Close()
 	}
 
