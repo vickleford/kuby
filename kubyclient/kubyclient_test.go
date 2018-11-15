@@ -27,7 +27,7 @@ func TestGetVersion(t *testing.T) {
 	testClient, _ := httpclienttest.New(niceResponse)
 	client := New(mockCtxMgr, testClient)
 
-	if actual := client.ClusterVersion(); actual != expected {
+	if actual, _ := client.ClusterVersion(); actual != expected {
 		t.Errorf("Expected %s, got %s", expected, actual)
 	}
 }
@@ -65,6 +65,16 @@ func TestAcceptHeader(t *testing.T) {
 	client.ClusterVersion()
 	if actual := spy.Request.Header.Get("Accept"); actual != expected {
 		t.Errorf("Expected %s, got %s", expected, actual)
+	}
+}
+
+func TestBadJsonReturnsError(t *testing.T) {
+	const badResponse = "401 Unauthorized"
+	testClient, _ := httpclienttest.New(badResponse)
+	client := New(mockCtxMgr, testClient)
+	_, err := client.ClusterVersion()
+	if err == nil {
+		t.Error("Expected error")
 	}
 }
 

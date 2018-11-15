@@ -40,7 +40,10 @@ func main() {
 	insecureclient := &http.Client{Transport: &transportConfig}
 
 	clusterclient := kubyclient.New(context, insecureclient)
-	version := clusterclient.ClusterVersion()
+	version, err := clusterclient.ClusterVersion()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+	}
 
 	// don't forget to handle errors way better in general
 

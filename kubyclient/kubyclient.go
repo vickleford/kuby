@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/vickleford/kuby/ctxmgr"
 )
@@ -14,7 +13,7 @@ type ClusterVersion struct {
 }
 
 type KubyClient interface {
-	ClusterVersion() string
+	ClusterVersion() (string, error)
 }
 
 type kubyclient struct {
@@ -22,12 +21,12 @@ type kubyclient struct {
 	client  *http.Client
 }
 
-func (k *kubyclient) ClusterVersion() string {
+func (k *kubyclient) ClusterVersion() (string, error) {
 	path := fmt.Sprintf("%s/version", k.context.Endpoint())
 
 	req, err := http.NewRequest("GET", path, nil)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating request: %s\n", err)
+		return "", err
 	}
 	req.SetBasicAuth(k.context.Username(), k.context.Password())
 	req.Header.Add("Accept", "application/json")
@@ -35,7 +34,7 @@ func (k *kubyclient) ClusterVersion() string {
 
 	resp, err := k.client.Do(req)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error executing request: %s\n", err)
+		return "", err
 	}
 	defer resp.Body.Close()
 
@@ -43,10 +42,10 @@ func (k *kubyclient) ClusterVersion() string {
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&v)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error converting response to JSON: %s\n", err)
+		return "", err
 	}
 
-	return v.GitVersion
+	return v.GitVersion, nil
 }
 
 func New(ctx ctxmgr.ContextManager, c *http.Client) KubyClient {
