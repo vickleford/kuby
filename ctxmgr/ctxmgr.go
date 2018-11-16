@@ -8,30 +8,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Kubeconfig struct {
-	CurrentContext string `yaml:"current-context"`
-	Clusters       []struct {
-		Name    string
-		Cluster struct {
-			Server string
-		}
-	}
-	Contexts []struct {
-		Name    string
-		Context struct {
-			Cluster string
-			User    string
-		}
-	}
-	Users []struct {
-		Name string
-		User struct {
-			Password string
-			Username string
-		}
-	}
-}
-
 type ContextManager interface {
 	Username() string
 	Password() string
