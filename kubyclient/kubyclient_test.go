@@ -78,6 +78,16 @@ func TestBadJsonReturnsError(t *testing.T) {
 	}
 }
 
+func TestEmptyVersionIsError(t *testing.T) {
+	const emptyResponse = ""
+	testClient, _ := httpclienttest.New(emptyResponse)
+	client := New(mockCtxMgr, testClient)
+	_, err := client.ClusterVersion()
+	if err == nil {
+		t.Error("Expected error")
+	}
+}
+
 const niceResponse = `{
 	"major": "1",
 	"minor": "10",
