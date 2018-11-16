@@ -4,8 +4,7 @@ import "testing"
 import "os"
 
 func TestNoConfigGivesDefaultKubeconf(t *testing.T) {
-	// this unintentionally depends on KUBECONFIG being unset.
-	// fix that.
+	os.Unsetenv("KUBECONFIG")
 	expected := os.ExpandEnv("${HOME}/.kube/config")
 	osArgsSim := []string{"kuby", "get", "nodes"}
 	args := New(osArgsSim)

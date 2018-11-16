@@ -66,7 +66,7 @@ func main() {
 		// maybe this stuff can go into fetcher.DownloadManager
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error creating file %s: %s\n",
-				"placeholder", err)
+				kubectlpath, err)
 			os.Exit(1)
 		}
 
@@ -75,6 +75,8 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error writing kubectl to location %s: %s\n",
 				kubectlpath, err)
+			downloadpath.Close()
+			os.Remove(kubectlpath)
 			os.Exit(1)
 		}
 		downloadpath.Close()
