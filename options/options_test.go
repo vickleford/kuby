@@ -60,6 +60,24 @@ func TestContextFlagDetected(t *testing.T) {
 	}
 }
 
+func TestLateContextFlagDetected(t *testing.T) {
+	expected := "llama"
+	osArgsSim := []string{"kuby", "get", "ingress", "--all-namespaces", "--context=llama"}
+	args := New(osArgsSim)
+	if args.Context != expected {
+		t.Errorf("Expected %s, got %s", expected, args.Context)
+	}
+}
+
+func TestContextWorksWithoutEquals(t *testing.T) {
+	expected := "llama"
+	osArgsSim := []string{"kuby", "get", "ingress", "--context", "llama"}
+	args := New(osArgsSim)
+	if args.Context != expected {
+		t.Errorf("Expected %s, got %s", expected, args.Context)
+	}
+}
+
 func TestUnknownShorthandFlagPassesThrough(t *testing.T) {
 	New([]string{"kuby", "-n", "thatnamespace", "get", "pods"})
 }
