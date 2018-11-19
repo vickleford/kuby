@@ -25,6 +25,7 @@ type Kubectl interface {
 type kubectl struct {
 	stderrPipe io.ReadCloser
 	stdoutPipe io.ReadCloser
+	stdinPipe  io.WriteCloser
 	cmd        *exec.Cmd
 }
 
@@ -52,10 +53,15 @@ func (k *kubectl) Run() (err error) {
 	if err != nil {
 		return err
 	}
+	k.stdinPipe, err = k.cmd.StdinPipe()
+	if err != nil {
+		return err
+	}
 
 	// set up scanners
 	stdoutScanner := bufio.NewScanner(k.stdoutPipe)
 	stderrScanner := bufio.NewScanner(k.stderrPipe)
+	stdinScanner := bufio.NewScanner(os.Stdin)
 
 	// stream pipes
 	go func() {
@@ -67,6 +73,13 @@ func (k *kubectl) Run() (err error) {
 	go func() {
 		for stderrScanner.Scan() {
 			fmt.Fprintf(os.Stderr, "%s\n", stderrScanner.Text())
+		}
+	}()
+
+	go func() {
+		defer k.stdinPipe.Close()
+		for stdinScanner.Scan() {
+			io.WriteString(k.stdinPipe, stdinScanner.Text())
 		}
 	}()
 
