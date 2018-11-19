@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"syscall"
 
 	"github.com/vickleford/kuby/ctxmgr"
 	"github.com/vickleford/kuby/fetcher"
-	"github.com/vickleford/kuby/kubectl"
 	"github.com/vickleford/kuby/kubyclient"
 	"github.com/vickleford/kuby/options"
 )
@@ -53,10 +53,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	cmd := kubectl.New(kubectlpath)
-	err = cmd.Run()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1) // should exit what kubectl exits, not always 1.
-	}
+	syscall.Exec(kubectlpath, os.Args, os.Environ())
 }
