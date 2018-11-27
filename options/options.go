@@ -4,70 +4,70 @@ import (
 	"os"
 )
 
-type argument struct {
-	Name     string // eg kubeconfig for --kubeconfig
-	Value    string // determined value
-	Default  string // if not given on cmdline
-	Override string // environment variable name
+type option struct {
+	name     string // eg kubeconfig for --kubeconfig
+	value    string // determined value
+	vdefault string // if not given on cmdline
+	override string // environment variable name
 }
 
 type ArgTranslator struct {
-	args       []string
-	arguments  []*argument
+	cliargs    []string
+	options    []*option
 	ConfigFile string
 	Context    string
 }
 
 func (a *ArgTranslator) Add(name, vdefault, override string) {
-	arg := new(argument)
-	arg.Name = name
-	arg.Default = vdefault
-	arg.Override = override
-	a.arguments = append(a.arguments, arg)
+	arg := new(option)
+	arg.name = name
+	arg.vdefault = vdefault
+	arg.override = override
+	a.options = append(a.options, arg)
 }
 
 func (a *ArgTranslator) Get(key string) string {
 	// might should check if it has been parsed yet
-	for _, a := range a.arguments {
-		if a.Name == key {
-			return a.Value
+	for _, a := range a.options {
+		if a.name == key {
+			return a.value
 		}
 	}
 	return ""
 }
 
 func (a *ArgTranslator) Parse() {
-	for _, flag := range a.arguments {
-		flaglen := len(flag.Name) + 2 // adjust for preceeding "--"
-		for i, v := range a.args {
-			arglen := len(v) // already has preceeding "--"
+	for _, flag := range a.options {
+		flaglen := len(flag.name) + 2 // adjust for preceeding "--"
+		for i, arg := range a.cliargs {
+			arglen := len(arg) // already has preceeding "--"
 			if arglen < flaglen {
 				continue
 			}
-			if arglen == flaglen && v == "--"+flag.Name {
-				flag.Value = a.args[i+1]
+			if arglen == flaglen && arg == "--"+flag.name {
+				flag.value = a.cliargs[i+1]
 				break
 			}
-			if arglen > flaglen && v[:flaglen+1] == "--"+flag.Name+"=" {
-				flag.Value = v[flaglen+1:]
+			if arglen > flaglen && arg[:flaglen+1] == "--"+flag.name+"=" {
+				flag.value = arg[flaglen+1:]
 				break
 			}
 		}
 	}
 
-	for _, flag := range a.arguments {
-		if flag.Value != "" {
+	for _, flag := range a.options {
+		if flag.value != "" {
 			// already set, do nothing.
-		} else if ev := os.Getenv(flag.Override); ev != "" {
-			flag.Value = os.ExpandEnv(ev)
+		} else if ev := os.Getenv(flag.override); ev != "" {
+			flag.value = os.ExpandEnv(ev)
 		} else {
-			flag.Value = os.ExpandEnv(flag.Default)
+			flag.value = os.ExpandEnv(flag.vdefault)
 		}
 	}
 }
 
 func New(args []string) *ArgTranslator {
 	argtr := new(ArgTranslator)
-	argtr.args = args
+	argtr.cliargs = args
 	return argtr
 }
