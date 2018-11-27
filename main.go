@@ -15,8 +15,11 @@ import (
 
 func main() {
 	opts := options.New(os.Args)
+	opts.Add("kubeconfig", "${HOME}/.kube/config", "KUBECONFIG")
+	opts.Add("context", "", "")
+	opts.Parse()
 
-	kubeconfig, err := os.Open(opts.ConfigFile)
+	kubeconfig, err := os.Open(opts.Get("kubeconfig"))
 	defer kubeconfig.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
@@ -24,10 +27,10 @@ func main() {
 	}
 
 	var context ctxmgr.ContextManager
-	if opts.Context == "" {
+	if opts.Get("context") == "" {
 		context, err = ctxmgr.New(kubeconfig)
 	} else {
-		context, err = ctxmgr.NewWithContext(kubeconfig, opts.Context)
+		context, err = ctxmgr.NewWithContext(kubeconfig, opts.Get("context"))
 	}
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading config: %s\n", err)
