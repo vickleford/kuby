@@ -23,3 +23,8 @@ WIP
 ---
 
 Obviously, this is a work in progress, but hopefully this illustrates the vision and direction!
+
+Contributing
+---
+
+kuby uses Go Modules. Please use Go 1.11 and clone this repository outside `GOPATH`.
