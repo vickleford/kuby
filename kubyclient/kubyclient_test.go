@@ -20,12 +20,37 @@ func (m mockContextManager) Endpoint() string {
 	return "https://api.k8s.example.com"
 }
 
+type eksContextManager struct{}
+
+func (m eksContextManager) Username() string {
+	return ""
+}
+
+func (m eksContextManager) Password() string {
+	return ""
+}
+
+func (m eksContextManager) Endpoint() string {
+	return "https://example.eks.amazonaws.com"
+}
+
 var mockCtxMgr mockContextManager
+var ctxMgrForEks eksContextManager
 
 func TestGetVersion(t *testing.T) {
 	expected := "v1.10.0"
 	testClient, _ := httpclienttest.New(niceResponse)
 	client := New(mockCtxMgr, testClient)
+
+	if actual, _ := client.ClusterVersion(); actual != expected {
+		t.Errorf("Expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetVersionWithEksResponse(t *testing.T) {
+	expected := "v1.11.5"
+	testClient, _ := httpclienttest.New(eksResponse)
+	client := New(ctxMgrForEks, testClient)
 
 	if actual, _ := client.ClusterVersion(); actual != expected {
 		t.Errorf("Expected %s, got %s", expected, actual)
@@ -45,6 +70,16 @@ func TestBasicAuthUsage(t *testing.T) {
 
 	if actualPassword != expectedPassword {
 		t.Errorf("Expected %s, got %s", expectedPassword, actualPassword)
+	}
+}
+
+func TestEksConfigDoesNotAuthenticate(t *testing.T) {
+	testClient, spy := httpclienttest.New(eksResponse)
+	client := New(ctxMgrForEks, testClient)
+	client.ClusterVersion()
+	_, _, k := spy.Request.BasicAuth()
+	if k != false {
+		t.Error("Expected no basic auth")
 	}
 }
 
@@ -96,6 +131,19 @@ const niceResponse = `{
 	"gitTreeState": "clean",
 	"buildDate": "2018-08-02T17:11:51Z",
 	"goVersion": "go1.9.3",
+	"compiler": "gc",
+	"platform": "linux/amd64"
+}
+`
+
+const eksResponse = `{
+	"major": "1",
+	"minor": "11+",
+	"gitVersion": "v1.11.5-eks-6bad6d",
+	"gitCommit": "6bad6d9c768dc0864dab48a11653aa53b5a47043",
+	"gitTreeState": "clean",
+	"buildDate": "2018-12-06T23:13:14Z",
+	"goVersion": "go1.10.3",
 	"compiler": "gc",
 	"platform": "linux/amd64"
 }
