@@ -20,11 +20,11 @@ func main() {
 	opts.Parse()
 
 	kubeconfig, err := os.Open(opts.Get("kubeconfig"))
-	defer kubeconfig.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}
+	defer kubeconfig.Close()
 
 	var context ctxmgr.ContextManager
 	if opts.Get("context") == "" {
@@ -59,5 +59,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	syscall.Exec(kubectlpath, os.Args, os.Environ())
+	err = syscall.Exec(kubectlpath, os.Args, os.Environ())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "kubectl error: %s\n", err)
+	}
 }
