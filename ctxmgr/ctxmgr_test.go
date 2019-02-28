@@ -96,6 +96,17 @@ func TestContextNotFoundGivesError(t *testing.T) {
 	}
 }
 
+func TestEksContextDoesNotBlowUp(t *testing.T) {
+	context, err := New(strings.NewReader(conf_eks))
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if expected := ""; context.Username() != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, context.Username())
+	}
+}
+
 const conf_no_context = `
 apiVersion: v1
 clusters:
@@ -186,4 +197,31 @@ users:
   user:
     password: wheredyougetthosepeepers
     username: admin
+`
+
+const conf_eks = `
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: REDACTED
+    server: https://xxx.yl4.us-west-2.eks.amazonaws.com
+  name: arn:aws:eks:us-west-2:111111111111:cluster/eksclustername
+contexts:
+- context:
+    cluster: arn:aws:eks:us-west-2:111111111111:cluster/eksclustername
+    user: arn:aws:eks:us-west-2:111111111111:cluster/eksclustername
+  name: arn:aws:eks:us-west-2:111111111111:cluster/eksclustername
+current-context: arn:aws:eks:us-west-2:111111111111:cluster/eksclustername
+kind: Config
+preferences: {}
+users:
+- name: arn:aws:eks:us-west-2:111111111111:cluster/eksclustername
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      args:
+      - token
+      - -i
+      - eksclustername
+      command: aws-iam-authenticator
 `

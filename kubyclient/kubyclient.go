@@ -2,8 +2,10 @@ package kubyclient
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/vickleford/kuby/ctxmgr"
 )
@@ -28,7 +30,9 @@ func (k *kubyclient) ClusterVersion() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.SetBasicAuth(k.context.Username(), k.context.Password())
+	if k.context.Username() != "" {
+		req.SetBasicAuth(k.context.Username(), k.context.Password())
+	}
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("User-Agent", "kuby")
 
@@ -41,6 +45,14 @@ func (k *kubyclient) ClusterVersion() (string, error) {
 	var v ClusterVersion
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&v)
+
+	re := regexp.MustCompile(`v[0-9]\.[0-9]+\.[0-9]+`)
+	if filteredVersion := re.FindStringSubmatch(v.GitVersion); len(filteredVersion) == 1 {
+		v.GitVersion = filteredVersion[0]
+	} else {
+		return "", errors.New("Could not filter version correctly")
+	}
+
 	if err != nil {
 		return "", err
 	}

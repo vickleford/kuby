@@ -39,7 +39,10 @@ func main() {
 
 	httpclient := new(http.Client)
 
-	transportConfig := http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	transportConfig := http.Transport{
+		Proxy:           http.ProxyFromEnvironment,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	insecureclient := &http.Client{Transport: &transportConfig}
 
 	clusterclient := kubyclient.New(context, insecureclient)
