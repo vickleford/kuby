@@ -3,6 +3,9 @@ language: go
 go: 
   - 1.11.x
 
+before_script:
+  - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 
 script:
+  - golangci-lint run
   - go test -v -race -cover ./...
