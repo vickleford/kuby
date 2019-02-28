@@ -5,6 +5,3 @@ env:
 
 go:
   - 1.11.x
-
-before_script:
-  - make tools

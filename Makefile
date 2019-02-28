@@ -1,6 +1,6 @@
 .PHONY: tools test lint
 
-all: lint test
+all: test
 
 lint:
 	golangci-lint run --tests=false
@@ -8,6 +8,6 @@ lint:
 test:
 	go test -v -race -cover ./...
 
-tools:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint
+# tools:
+# 	go install github.com/golangci/golangci-lint/cmd/golangci-lint
 
