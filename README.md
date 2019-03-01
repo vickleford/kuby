@@ -1,6 +1,8 @@
 kuby
 ===
 
+[![Build Status](https://travis-ci.org/vickleford/kuby.svg?branch=master)](https://travis-ci.org/vickleford/kuby)
+
 Ever had to manage multiple Kubernetes clusters with differing versions?
 
 Meet kuby.
